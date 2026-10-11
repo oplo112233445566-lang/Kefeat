@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الوصل والفصل</title>
+<style>
+:root{
+  --bg:#f6f9ff; --ink:#1c2b4d; --muted:#6a7a99; --card:#ffffff; --line:#dbe4f7; --shade:#cfdaf2;
+  --pri:#3b5bfd; --pri-d:#2640c4; --gold:#ffb703; --gold-d:#d98e00; --ok:#22b573; --bad:#ef4565;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic","Geeza Pro","Arial",sans-serif;
+  -webkit-user-select:none;user-select:none}
+body{background:radial-gradient(1200px 600px at 100% -10%,#e6edff 0,transparent 60%),radial-gradient(900px 500px at 0% 110%,#fff0d6 0,transparent 60%),var(--bg)}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#bg svg{position:absolute;opacity:.5;animation:float 11s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-14px) rotate(8deg)}}
+.modal{position:fixed;inset:0;z-index:40;background:rgba(28,43,77,.45);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal .box{background:#fff;border-radius:26px;padding:26px;max-width:460px;width:100%;text-align:center;border:3px solid var(--line);box-shadow:0 10px 0 var(--shade)}
+.modal p{font-size:clamp(19px,3.4vw,26px);font-weight:800;margin:6px 0 18px}
+#app{position:relative;z-index:1;min-height:100vh;max-width:1080px;margin:0 auto;
+  padding:max(14px,env(safe-area-inset-top)) 14px max(18px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:30}
+h1{font-size:clamp(30px,6.5vw,60px);margin:.15em 0;line-height:1.25;font-weight:900}
+h2{font-size:clamp(20px,3.6vw,30px);margin:.1em 0 .5em;font-weight:800}
+p{margin:.4em 0;line-height:1.7}
+.muted{color:var(--muted)}
+.card{background:var(--card);border-radius:26px;padding:clamp(16px,3vw,28px);border:3px solid var(--line);box-shadow:0 8px 0 var(--shade)}
+.center{text-align:center}
+.btn{font:inherit;font-weight:800;font-size:clamp(18px,3vw,26px);border:0;border-radius:18px;padding:14px 30px;cursor:pointer;
+  background:var(--pri);color:#fff;min-height:58px;box-shadow:0 6px 0 var(--pri-d);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--pri-d)}
+.btn.gold{background:var(--gold);color:#3a2600;box-shadow:0 6px 0 var(--gold-d)}
+.btn.gold:active{box-shadow:0 1px 0 var(--gold-d)}
+.btn.ghost{background:#fff;color:var(--ink);border:3px solid var(--line);box-shadow:0 5px 0 var(--shade)}
+.btn.ghost:active{box-shadow:0 1px 0 var(--shade)}
+.btn.big{font-size:clamp(24px,5vw,38px);padding:18px 46px;min-height:74px}
+.btn.sm{font-size:17px;min-height:44px;padding:8px 18px;box-shadow:0 4px 0 var(--shade)}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.row.c{justify-content:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:620px){.grid2{grid-template-columns:1fr}}
+label{display:block;font-size:16px;color:var(--muted);margin-bottom:6px;font-weight:700}
+input[type=text],select{width:100%;font:inherit;font-size:20px;padding:12px 14px;border-radius:14px;border:3px solid var(--line);background:#fff;color:var(--ink);min-height:54px;-webkit-user-select:text;user-select:text}
+input[type=text]:focus,select:focus{outline:none;border-color:var(--pri)}
+.tname{display:flex;align-items:center;gap:10px}
+.badge{width:34px;height:34px;border-radius:50%;flex:none;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:18px}
+.dot{width:16px;height:16px;border-radius:50%;flex:none;display:inline-block}
+
+/* hero */
+.hero{position:relative;text-align:center;padding:26px 14px 10px}
+.hero .pill{display:inline-block;background:#fff;border:3px solid var(--line);border-radius:999px;padding:6px 18px;font-weight:800;color:var(--pri);margin-bottom:8px}
+.hero h1 span{display:inline-block;background:linear-gradient(transparent 62%,#ffe08a 62%);padding:0 10px}
+
+/* top bar of question */
+.top{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.tbadge{display:flex;align-items:center;gap:12px;background:#fff;border:3px solid var(--line);border-radius:999px;padding:6px 20px 6px 8px;font-weight:900;font-size:clamp(18px,3.6vw,30px);box-shadow:0 5px 0 var(--shade)}
+.tbadge .badge{width:44px;height:44px;font-size:22px}
+.scorebox{background:#fff7dc;border:3px solid #ffe08a;border-radius:18px;padding:6px 16px;font-weight:900;font-size:clamp(18px,3.4vw,28px);color:#8a5a00;text-align:center;line-height:1.2}
+.scorebox small{display:block;font-size:13px;color:#a67b25;font-weight:700}
+.ring{position:relative;width:clamp(84px,16vw,120px);height:clamp(84px,16vw,120px);flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .bgc{stroke:var(--line)} .ring .fg{stroke:var(--ok);transition:stroke-dashoffset .25s linear,stroke .3s}
+.ring.low .fg{stroke:var(--bad)}
+.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,4.4vw,34px);font-weight:900;font-variant-numeric:tabular-nums}
+.ring.low b{color:var(--bad);animation:beat .6s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.12)}}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.prog i{width:clamp(14px,3vw,26px);height:10px;border-radius:6px;background:var(--line)}
+.prog i.done{background:var(--ok)} .prog i.cur{background:var(--gold)}
+.q{font-size:clamp(24px,5vw,44px);font-weight:900;line-height:1.65;text-align:center;padding:clamp(18px,4vw,40px) 14px;position:relative}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.opts{grid-template-columns:1fr}}
+.opt{font:inherit;font-weight:800;font-size:clamp(20px,3.6vw,32px);color:var(--ink);background:#fff;border:3px solid var(--line);
+  border-radius:20px;padding:14px 16px;min-height:82px;cursor:pointer;display:flex;align-items:center;gap:14px;text-align:right;box-shadow:0 6px 0 var(--shade);transition:transform .08s,box-shadow .08s}
+.opt:active{transform:translateY(4px);box-shadow:0 2px 0 var(--shade)}
+.opt .l{width:46px;height:46px;border-radius:14px;background:#eef2ff;color:var(--pri);display:flex;align-items:center;justify-content:center;font-weight:900;flex:none;font-size:24px}
+.opt.ok{background:#dcf8ea;border-color:var(--ok);box-shadow:0 6px 0 #14935a;animation:pop .4s}
+.opt.ok .l{background:var(--ok);color:#fff}
+.opt.bad{background:#ffe4ea;border-color:var(--bad);box-shadow:0 6px 0 #c42a49;animation:shake .4s}
+.opt.bad .l{background:var(--bad);color:#fff}
+.opt.dim{opacity:.45}
+@keyframes pop{40%{transform:scale(1.04)}}
+@keyframes shake{20%{transform:translateX(8px)}40%{transform:translateX(-8px)}60%{transform:translateX(5px)}80%{transform:translateX(-5px)}}
+.note{min-height:2.8em;text-align:center;font-size:clamp(17px,2.8vw,24px);font-weight:800}
+
+/* intro/end */
+.avatar{width:clamp(96px,18vw,150px);height:clamp(96px,18vw,150px);border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:clamp(48px,10vw,84px);box-shadow:0 8px 0 rgba(0,0,0,.14);animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.facts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.fact{background:#f1f5ff;border:3px solid var(--line);border-radius:18px;padding:8px 20px;font-weight:800;font-size:clamp(18px,3vw,26px)}
+.fact small{display:block;color:var(--muted);font-size:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{display:flex;align-items:center;gap:8px;background:#fff;border:3px solid var(--line);border-radius:999px;padding:5px 14px;font-weight:800;font-size:17px}
+.chip b{color:#b87400}
+.chip.now{border-color:var(--pri)}
+.cd{font-size:clamp(110px,28vw,220px);font-weight:900;color:var(--pri);line-height:1.1;animation:cdpop .8s ease-out}
+@keyframes cdpop{0%{transform:scale(.4);opacity:0}30%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+.bigscore{font-size:clamp(52px,12vw,110px);font-weight:900;color:#e08a00;line-height:1.1}
+
+/* final */
+.win{position:relative;text-align:center;background:linear-gradient(180deg,#fff7dc,#fff);border-color:#ffe08a;overflow:hidden}
+.win svg.cup{width:clamp(110px,22vw,170px);animation:bob 1.8s ease-in-out infinite;filter:drop-shadow(0 8px 0 rgba(224,138,0,.25))}
+.win h1{margin:.1em 0}
+.rank{position:relative;display:flex;align-items:center;gap:12px;background:#f1f5ff;border-radius:18px;padding:12px 16px;margin:10px 0;font-size:clamp(20px,3.6vw,30px);font-weight:900;overflow:hidden;border:3px solid var(--line)}
+.rank .fill{position:absolute;inset:0 auto 0 0;background:var(--c);opacity:.14;width:0;transition:width 1.2s cubic-bezier(.2,.8,.2,1)}
+[dir=rtl] .rank .fill{inset:0 0 0 auto}
+.rank>*:not(.fill){position:relative}
+.rank .n{width:2.2em;text-align:center}
+.rank .nm{flex:1}
+.rank .pt{color:#b87400}
+.rank.top1{background:#fff3c4;border-color:#ffd24d}
+.pause{position:fixed;inset:0;background:rgba(246,249,255,.95);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:10}
+.qtag{display:inline-block;background:#eef2ff;color:var(--pri);font-weight:800;border-radius:999px;padding:3px 16px;font-size:15px;margin-bottom:8px}
+.blank{display:inline-block;min-width:3.4em;border-bottom:5px dashed var(--pri);margin:0 8px;padding:0 8px;color:var(--pri);vertical-align:bottom;min-height:1.2em}
+.blank.ok{color:var(--ok);border-bottom:5px solid var(--ok)}
+.blank.bad{color:var(--bad);border-bottom:5px solid var(--bad)}
+.q.sm{font-size:clamp(20px,3.6vw,30px)}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt.tf{justify-content:center;font-size:clamp(26px,5vw,40px);min-height:96px}
+.match{position:relative;display:flex;gap:clamp(40px,11vw,120px);justify-content:center;align-items:stretch}
+.mcol{flex:1;display:flex;flex-direction:column;gap:12px;max-width:430px}
+.lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.mi{font:inherit;font-weight:800;font-size:clamp(17px,3vw,26px);color:var(--ink);background:#fff;border:3px solid var(--line);border-radius:18px;padding:12px 10px;min-height:68px;cursor:pointer;box-shadow:0 5px 0 var(--shade);flex:1;transition:transform .08s}
+.mi.sel{border-color:var(--pri);background:#eef2ff;transform:translateY(-3px)}
+.mi.done{pointer-events:none;background:var(--tint,#f1f5ff);border-color:var(--bc,var(--line))}
+.mi.wrong{border-color:var(--bad);background:#ffe4ea;animation:shake .4s}
+.mhint{text-align:center;color:var(--muted);font-weight:700;font-size:16px}
+@media(prefers-reduced-motion:reduce){#bg svg,.avatar,.win svg.cup,.ring.low b{animation:none}}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<canvas id="fx"></canvas>
+<div id="app"></div>
+
+<script>
+/* =====================================================
+   بنك الأسئلة — يمكنك تعديله أو إضافة أسئلة جديدة
+   c = الإجابة الصحيحة | w = ثلاث إجابات خاطئة | e = توضيح (اختياري)
+   يجب أن يكون عدد الأسئلة 36 على الأقل
+   ===================================================== */
+const QUESTIONS = [
+ {q:"كم كلمة تتكوّن منها (لبيتنا)؟", c:"ثلاث كلمات", w:["كلمة واحدة","كلمتان","أربع كلمات"], e:"اللام + بيت + نا"},
+ {q:"(كهرومغناطيسية) مكوّنة من:", c:"كهرباء + مغناطيس", w:["كهرب + مغنطة","كهرو + مغناطيس","كهرباء + مغنطيسي"]},
+ {q:"(بعلبك) مكوّنة من:", c:"بعل + بك", w:["بع + لبك","بعلب + ك","بعل + بيك"]},
+ {q:"(رأسمالية) مكوّنة من:", c:"رأس + مالية", w:["رأس + مال","را + سمالية","رأسم + الية"]},
+ {q:"(حينئذٍ) مكوّنة من:", c:"حين + إذ", w:["حي + نئذ","حين + أذى","حينا + إذن"]},
+ {q:"(وقتئذٍ) مكوّنة من:", c:"وقت + إذ", w:["وق + تئذ","وقتا + إذن","وقت + أذى"]},
+ {q:"(حبّذا) مكوّنة من:", c:"حبّ + ذا", w:["حب + أذى","ح + بذا","حبّا + ذا"]},
+ {q:"(يومئذٍ) مكوّنة من:", c:"يوم + إذ", w:["يوم + إذا","يومًا + أن","يو + مئذ"]},
+ {q:"أصل (ألّا) في: يجب ألّا تتأخر", c:"أن + لا", w:["إن + لا","أنّ + لم","أن + لن"]},
+ {q:"أصل (إلّا) في: إلّا تذاكر تفشل", c:"إن + لا", w:["أن + لا","إلى + لا","إذا + لا"]},
+ {q:"أصل (لئلّا) هو:", c:"لأن + لا", w:["لكي + لا","لإن + لا","لأنّ + لا"]},
+ {q:"أصل (لكيلا) هو:", c:"لكي + لا", w:["لأن + لا","لكي + لم","لكن + لا"]},
+ {q:"أصل (ممَّن) في: ممَّن أخذتَ العلم؟", c:"مِن + مَن", w:["مِن + ما","عن + مَن","مِن + مِن"]},
+ {q:"أصل (عمَّن) في: عمَّن تتحدث؟", c:"عن + مَن", w:["عن + ما","من + عن","على + مَن"]},
+ {q:"عند وصل (من) و(عن) بـ(مَن) نحذف حرف:", c:"النون", w:["الألف","الميم","الواو"], e:"مِنْ + مَن = ممَّن  /  عنْ + مَن = عمَّن"},
+ {q:"أيّ الحروف الآتية توصل بـ(مَن) كتابةً؟", c:"في، اللام، الباء", w:["ثم، أو، بل","لا، لن، لم","هل، أم، ألا"], e:"فيمَن، لمَن، بمَن"},
+ {q:"أصل (مِمَّ) في: مِمَّ تتكوّن الخلية؟", c:"مِن + ما", w:["مِن + مَن","عن + ما","في + ما"]},
+ {q:"أصل (عمَّ) في: عمَّ تتساءل؟", c:"عن + ما", w:["عن + مَن","من + ما","على + ما"]},
+ {q:"أصل (لِمَ) في: لِمَ تقرأ؟", c:"اللام + ما", w:["اللام + مَن","لا + ما","لم + ما"]},
+ {q:"أصل (إلامَ) في: إلامَ ترجع الظروف؟", c:"إلى + ما", w:["إلى + مَن","إلا + ما","على + ما"]},
+ {q:"أصل (علامَ) في: علامَ تضع الكراسة؟", c:"على + ما", w:["على + مَن","عن + ما","إلى + ما"]},
+ {q:"عند وصل (ما) الاستفهامية بحرف الجر نحذف:", c:"ألف (ما)", w:["نون حرف الجر","ميم (ما)","لا نحذف شيئًا"]},
+ {q:"في (إنّما، كأنّما، ليتما، لكنّما) وُصلت (ما) بـ:", c:"الحروف الناسخة", w:["الأفعال","أسماء الاستفهام","حروف العطف"]},
+ {q:"في (أينما، كيفما) وُصلت (ما) بـ:", c:"أسماء الشرط", w:["حروف الجر","الأفعال الماضية","الضمائر"]},
+ {q:"في (عندما، كلّما، حينما) وُصلت (ما) بـ:", c:"الظروف", w:["الحروف الناسخة","حروف الجر","الأسماء الموصولة"]},
+ {q:"كيف تُكتب (على + ما) الاستفهامية في: ___ يدلّ حرصك؟", c:"علامَ", w:["على ما","عَلَمَ","علاما"]},
+ {q:"كيف تُكتب (من + مَن) في: ___ هؤلاء كان الأفضل؟", c:"ممَّن", w:["من مَن","منمن","ممْن"]},
+ {q:"في: (الحلزون من طائفة البطنقدميات) الكلمة مكوّنة من:", c:"البطن + قدم", w:["بطن + قدمي","البط + نقدميات","ال + بطنقدم"]},
+ {q:"أصل (مثلما) في: اقتربتُ مثلما اقتربتَ:", c:"مثل + ما", w:["مثلُ + مَن","مِن + ثلما","مثلا + ما"]},
+ {q:"أيّ الكتابات الآتية صحيحة وفق الدرس؟", c:"ثلاث مئة", w:["ثلاثمئة","ثلاثمئه","ثلاثمأة"], e:"تُفصل (مئة) عن عددها لأنها مكوّنة من كلمتين"},
+ {q:"أيّ مما يأتي يجب وصله بما قبله؟", c:"تاء الفاعل في (أكلتُ)", w:["كلمة (الفاكهة)","كلمة (كلّها)","كلمة (أكلَ)"], e:"ما كان من حرف أو حرفين ولا يصحّ الابتداء به يجب وصله"},
+ {q:"لا تتصل (كي) بـ(لا) إذا:", c:"لم تتصل بها اللام", w:["سبقتها الواو","جاء بعدها فعل ماضٍ","سبقها فعل ظنّ"], e:"وابن السبيل كي لا يكون دولة"},
+ {q:"لا تتصل (أن) بـ(لا) إذا:", c:"سبقت بفعل يدلّ على اليقين أو الظن", w:["سبقها حرف جر","جاء بعدها اسم","سبقتها اللام"], e:"وظنّوا أن لا ملجأ من الله إلا إليه"},
+ {q:"في: (عجبتُ مما رأيت) لا تُحذف ألف (ما) لأنها:", c:"ما الموصولة", w:["ما الاستفهامية","ما النافية","ما المصدرية"]},
+ {q:"(فيمَ تفكّر؟) حرف الجر + ما:", c:"الاستفهامية", w:["الموصولة","النافية","الزائدة"]},
+ {q:"(تأمّلتُ فيما حولي) حرف الجر + ما:", c:"الموصولة", w:["الاستفهامية","النافية","الشرطية"]},
+ {q:"(يدافع المحامي عمَّن تولّى أمره) كلمة (عمَّن) هي:", c:"عن + مَن الموصولة", w:["عن + مَن الاستفهامية","عن + ما الموصولة","على + مَن"]},
+ {q:"(ممَّن دنوتَ؟) كلمة (ممَّن) هي:", c:"من + مَن الاستفهامية", w:["من + ما الموصولة","من + ما الاستفهامية","عن + مَن الموصولة"]},
+ {q:"إذا اتصلت اللام بـ(كي) فإنها تُكتب مع (لا):", c:"لكيلا (متصلة)", w:["لكي لا (منفصلة)","كيلا (بلا لام)","لكي-لا (بشرطة)"]},
+ {q:"أصل (كأنّما) في: كأنّما الأبطال أسود:", c:"كأنّ + ما", w:["كأن + مَن","كي + أنّما","كأنْ + لا"]},
+
+ /* ---- أسئلة إضافية ---- */
+ {q:"(تعلّمتُ ممّا قرأتُ) نوع (ما) هنا:", c:"موصولة", w:["استفهامية","نافية","شرطية"]},
+ {q:"لماذا بقيت ألف (ما) في: ابتعدتُ عمَّا يغضب الله؟", c:"لأن (ما) موصولة", w:["لأن (ما) استفهامية","لأن الكلمة فعل","لأن (عن) حرف عطف"]},
+ {q:"(طمعتُ فيما لديك) كلمة (فيما) هي:", c:"في + ما الموصولة", w:["في + ما الاستفهامية","في + مَن","فيم + ا"]},
+ {q:"كيف تُكتب (إلى + ما) الاستفهامية؟", c:"إلامَ", w:["إلى ما","إلا ما","ألامَ"]},
+ {q:"كيف تُكتب (عن + ما) الاستفهامية؟", c:"عمَّ", w:["عنما","عن ما","عمَّن"]},
+ {q:"كيف تُكتب (في + ما) الاستفهامية؟", c:"فيمَ", w:["في ما","فيمَن","فمَ"]},
+ {q:"كيف تُكتب (الباء + مَن)؟", c:"بمَن", w:["بمَّن","با مَن","بَن"]},
+ {q:"كيف تُكتب (اللام + مَن)؟", c:"لمَن", w:["لمَّن","ل مَن","لَن"]},
+ {q:"أيّ حرفَي الجر يُحذف نونهما عند وصلهما بـ(مَن)؟", c:"مِن وعن", w:["في واللام","الباء وإلى","على وإلى"], e:"ممَّن وعمَّن"},
+ {q:"(لِمَن هذه المتاجر؟) ما الذي حدث للكلمة؟", c:"وُصل حرف الجر (اللام) بـ(مَن)", w:["حُذفت نون (من)","وُصلت (ما) بالظرف","فُصلت اللام عن (مَن)"]},
+ {q:"(يتغاضى الحليم عمَّن يسيء إليه) ما الذي حدث؟", c:"وُصلت (عن) بـ(مَن) وحُذفت النون", w:["وُصلت (عن) بـ(ما) وحُذفت الألف","وُصلت (على) بـ(مَن)","فُصلت (عن) عن (مَن)"]},
+ {q:"(إلامَ تستمع كل ليلة؟) ما الذي حدث؟", c:"وُصلت (إلى) بـ(ما) وحُذفت ألف (ما)", w:["وُصلت (إلى) بـ(مَن) وحُذفت النون","وُصلت (على) بـ(ما)","فُصلت (إلى) عن (ما)"]},
+ {q:"(اقتربتُ مثلما اقتربتَ) ما الذي حدث؟", c:"وُصلت (ما) بالظرف (مثل)", w:["وُصل (مثل) بـ(مَن)","حُذفت ألف (ما)","وُصلت (ما) بحرف جر"]},
+ {q:"(أحضر الكتاب معك عندما تزورني) ما الذي حدث؟", c:"وُصلت (ما) بالظرف (عند)", w:["وُصل حرف الجر (عن) بـ(ما)","وُصلت (عند) بـ(مَن)","حُذفت نون (عند)"]},
+ {q:"اختر الكتابة الصحيحة: وابن السبيل ___ يكون دولة", c:"كي لا", w:["كيلا","لكيلا","لِكي لا"]},
+ {q:"اختر الكتابة الصحيحة: ذاكرتُ ___ أفشل", c:"لكيلا", w:["كي لا","لك يلا","كيلا"]},
+ {q:"اختر الكتابة الصحيحة: ظننتُ ___ ملجأ منه", c:"أن لا", w:["ألّا","أنلا","إنلا"]},
+ {q:"اختر الكتابة الصحيحة: يجب ___ تتأخر عن واجبك", c:"ألّا", w:["أن لا","أنلا","إلّا"]},
+ {q:"اختر الكتابة الصحيحة: ___ تذاكر تفشل", c:"إلّا", w:["إن لا","ألّا","أن لا"]},
+ {q:"اختر الكتابة الصحيحة: أسرع ___ تتأخر", c:"لئلّا", w:["لأنلا","لئِ لا","لإلا"]},
+ {q:"(ت) في (أكلتُ) هي:", c:"ضمير المتكلم", w:["ضمير الغائب","حرف جر","حرف عطف"]},
+ {q:"كل لفظين وُصلا وأصبحا يُستخدمان شفهيًّا:", c:"كالكلمة الواحدة", w:["ككلمتين منفصلتين","كحرف جر","كجملة كاملة"]},
+ {q:"كل كلمة يصحّ الابتداء بها والوقف عليها يجب أن تُكتب:", c:"منفصلة", w:["متصلة","بشرطة","بحذف حروفها"]},
+ {q:"ما لا يصحّ الابتداء به والوقف عليه يجب:", c:"وصله بما قبله", w:["فصله عمّا قبله","حذفه","تكراره"]},
+ {q:"أيّ الكتابات الآتية صحيحة وفق الدرس؟", c:"خمس مئة", w:["خمسمئة","خمسمئه","خمس مأة"]},
+ {q:"لماذا تُفصل كلمة (مئة) عن عددها في (ثلاث مئة)؟", c:"لأنها كلمة يصحّ الابتداء بها والوقف عليها", w:["لأنها اسم علم","لأنها حرف جر","لأنها فعل"]},
+ {q:"أيّ نوعَي (ما) تُحذف ألفها عند وصلها بحرف الجر؟", c:"الاستفهامية فقط", w:["الموصولة فقط","كلتاهما","لا واحدة منهما"]},
+ {q:"(مِمَّ يُصنع الزجاج؟) نوع (ما) هنا:", c:"استفهامية", w:["موصولة","نافية","شرطية"]},
+ {q:"(يتأثر خالد مما يحدث في العالم) نوع (ما) هنا:", c:"موصولة", w:["استفهامية","نافية","زائدة"]},
+ {q:"علامة الترقيم المناسبة: مِمَّ يُصنع الزجاج", c:"علامة الاستفهام (؟)", w:["النقطة (.)","علامة التعجب (!)","الفاصلة (،)"]},
+ {q:"علامة الترقيم المناسبة: يتأثر خالد ممّا يحدث في العالم", c:"النقطة (.)", w:["علامة الاستفهام (؟)","علامة التعجب (!)","النقطتان (:)"]},
+ {q:"علامة الترقيم المناسبة: فيمَ تفكّر", c:"علامة الاستفهام (؟)", w:["النقطة (.)","علامة التعجب (!)","الفاصلة (،)"]},
+ {q:"علامة الترقيم المناسبة: تأمّلتُ فيما حولي", c:"النقطة (.)", w:["علامة الاستفهام (؟)","علامة التعجب (!)","الفاصلة المنقوطة (؛)"]},
+ {q:"علامة الترقيم المناسبة: ممَّن دنوتَ", c:"علامة الاستفهام (؟)", w:["النقطة (.)","علامة التعجب (!)","النقطتان (:)"]},
+ {q:"أصل (إنّما) هو:", c:"إنّ + ما", w:["إنْ + مَن","أن + ما","إلى + ما"]},
+ {q:"أصل (ليتما) هو:", c:"ليت + ما", w:["ليت + مَن","لي + تما","لعل + ما"]},
+ {q:"أصل (حينما) هو:", c:"حين + ما", w:["حين + مَن","حي + نما","حينا + ما"]},
+ {q:"أصل (كلّما) هو:", c:"كلّ + ما", w:["كلّ + مَن","كلا + ما","كم + لما"]},
+ {q:"أصل (ريثما) هو:", c:"ريث + ما", w:["ريث + مَن","ري + ثما","ريثا + ما"]},
+
+ /* ---- صح أم خطأ ---- */
+ {t:"tf", q:"(لبيتنا) مكوّنة من ثلاث كلمات: اللام وبيت ونا.", a:true},
+ {t:"tf", q:"(كهرومغناطيسية) تُكتب كلمةً واحدة.", a:true},
+ {t:"tf", q:"تُكتب (ثلاث مئة) هكذا: ثلاثمئة (متصلة).", a:false, e:"تُفصل (مئة) عن عددها لأنها مكوّنة من كلمتين"},
+ {t:"tf", q:"أصل (لئلّا) هو: لأن + لا.", a:true},
+ {t:"tf", q:"أصل (لكيلا) هو: لكي + لا.", a:true},
+ {t:"tf", q:"عند وصل (مِن) بـ(مَن) نحذف الألف.", a:false, e:"نحذف النون: ممَّن"},
+ {t:"tf", q:"(ممَّن) أصلها: من + مَن.", a:true},
+ {t:"tf", q:"(عمَّ) أصلها: عن + ما الاستفهامية.", a:true},
+ {t:"tf", q:"تُحذف ألف (ما) الموصولة عند اتصالها بحرف الجر.", a:false, e:"لا تُحذف: ابتعدتُ عمَّا يغضب الله"},
+ {t:"tf", q:"تُحذف ألف (ما) الاستفهامية عند اتصالها بحرف الجر.", a:true, e:"مِمَّ، عمَّ، لِمَ، فيمَ"},
+ {t:"tf", q:"تتصل (كي) بـ(لا) إذا اتصلت بها اللام: لكيلا.", a:true},
+ {t:"tf", q:"تتصل (أن) بـ(لا) دائمًا حتى بعد فعل اليقين أو الظن.", a:false, e:"تُفصل بعد فعل اليقين أو الظن: علمتُ أن لا إله إلا الله"},
+ {t:"tf", q:"في (إنّما) و(كأنّما) وُصلت (ما) بالحروف الناسخة.", a:true},
+ {t:"tf", q:"في (أينما) وُصلت (ما) باسم شرط.", a:true},
+ {t:"tf", q:"في (عندما) وُصلت (ما) بحرف جر.", a:false, e:"(عند) ظرف"},
+ {t:"tf", q:"الكلمة التي يصحّ الابتداء بها والوقف عليها تُكتب منفصلة.", a:true},
+ {t:"tf", q:"(ت) في (أكلتُ) يصحّ الابتداء بها، لذلك تُفصل.", a:false, e:"لا يصحّ الابتداء بها، فتُوصل"},
+ {t:"tf", q:"تُكتب (في + ما) الاستفهامية منفصلة: في ما تفكّر؟", a:false, e:"تُكتب: فيمَ تفكّر؟"},
+ {t:"tf", q:"(علامَ) أصلها: على + ما.", a:true},
+ {t:"tf", q:"(إلامَ) أصلها: إلا + ما.", a:false, e:"أصلها: إلى + ما"},
+
+ /* ---- أكمل الفراغ ---- */
+ {t:"fill", q:"يجب ___ تتأخر عن واجبك.", c:"ألّا", w:["أنلا","إلّا","ألْ لا"]},
+ {t:"fill", q:"علمتُ ___ إله إلا الله.", c:"أن لا", w:["ألّا","أنلا","إنلا"]},
+ {t:"fill", q:"ابتعدتُ ___ يغضب الله.", c:"عمَّا", w:["عمَّ","عن ما","عمَّن"]},
+ {t:"fill", q:"___ تتكوّن الخلية؟", c:"مِمَّ", w:["من ما","مِمَّن","مِمَّا"]},
+ {t:"fill", q:"___ تتساءل؟", c:"عمَّ", w:["عنما","عمَّا","عمَّن"]},
+ {t:"fill", q:"___ أخذتَ العلم؟", c:"ممَّن", w:["من مَن","مِمَّا","ممْن"]},
+ {t:"fill", q:"___ تفكّر؟", c:"فيمَ", w:["فيمَن","فيما","فمَ"]},
+ {t:"fill", q:"تأمّلتُ ___ حولي.", c:"فيما", w:["فيمَ","فيمَن","فِمَا"]},
+ {t:"fill", q:"يتأثر خالد ___ يحدث في العالم.", c:"ممَّا", w:["مِمَّ","من ما","ممَّن"]},
+ {t:"fill", q:"ذاكرتُ ___ أفشل في الامتحان.", c:"لكيلا", w:["كي لا","لكي لن","كيلا"]},
+ {t:"fill", q:"أسرع ___ تتأخر.", c:"لئلّا", w:["لأنلا","لإلّا","ألّا"]},
+ {t:"fill", q:"___ تذاكر تفشل.", c:"إلّا", w:["ألّا","إن لا","أن لا"]},
+ {t:"fill", q:"اقتربتُ ___ اقتربتَ.", c:"مثلما", w:["مثلمَن","مثل ما لا","مثلَ مَن"]},
+ {t:"fill", q:"أحضر الكتاب معك ___ تزورني.", c:"عندما", w:["عن ما","عندَ مَن","عنما"]},
+ {t:"fill", q:"الحلزون من طائفة ___.", c:"البطنقدميات", w:["البطن قدميات","البطنقدميّ","البطن القدميات"]},
+ {t:"fill", q:"___ يدلّ حرصك الشديد؟", c:"علامَ", w:["على ما","علَمَ","علاما"]},
+ {t:"fill", q:"___ هذه المتاجر؟", c:"لمَن", w:["لمَّن","ل مَن","لَن"]},
+ {t:"fill", q:"(حين + إذ) تُكتب: ___", c:"حينئذٍ", w:["حين إذٍ","حيناذٍ","حينذٍ"]},
+ {t:"fill", q:"(يوم + إذ) تُكتب: ___", c:"يومئذٍ", w:["يوماذٍ","يوم إذٍ","يومذٍ"]},
+ {t:"fill", q:"(بعل + بك) تُكتب: ___", c:"بعلبك", w:["بعل بك","بعلبيك","بعبك"]},
+
+ /* ---- وصّل (كل سؤال 3 أو 4 أزواج) ---- */
+ {t:"match", q:"وصّل كل كلمة بأصلها:", pairs:[["ممَّن","مِن + مَن"],["عمَّن","عن + مَن"],["فيمَن","في + مَن"]]},
+ {t:"match", q:"وصّل كل كلمة بأصلها:", pairs:[["مِمَّ","مِن + ما"],["عمَّ","عن + ما"],["علامَ","على + ما"],["إلامَ","إلى + ما"]]},
+ {t:"match", q:"وصّل كل كلمة بأصلها:", pairs:[["ألّا","أن + لا"],["إلّا","إن + لا"],["لئلّا","لأن + لا"],["لكيلا","لكي + لا"]]},
+ {t:"match", q:"وصّل كل كلمة بأصلها:", pairs:[["حينئذٍ","حين + إذ"],["وقتئذٍ","وقت + إذ"],["يومئذٍ","يوم + إذ"]]},
+ {t:"match", q:"وصّل كل كلمة بأصلها:", pairs:[["إنّما","إنّ + ما"],["كأنّما","كأنّ + ما"],["ليتما","ليت + ما"]]},
+ {t:"match", q:"وصّل كل كلمة بأصلها:", pairs:[["حينما","حين + ما"],["كلّما","كلّ + ما"],["ريثما","ريث + ما"],["مثلما","مثل + ما"]]},
+ {t:"match", q:"وصّل كل كلمة بما وُصلت به (ما):", pairs:[["إنّما","حرف ناسخ"],["أينما","اسم شرط"],["كلّما","ظرف"]]},
+ {t:"match", q:"وصّل كل جملة بنوع الكلمة التي تحتها خط:", pairs:[["مِمَّ تتكوّن الخلية؟","ما الاستفهامية"],["عجبتُ ممّا رأيت","ما الموصولة"],["ممَّن دنوتَ؟","مَن الاستفهامية"],["عمَّن تولّى أمره","مَن الموصولة"]]},
+ {t:"match", q:"وصّل كل كلمة بمكوّناتها:", pairs:[["لبيتنا","اللام + بيت + نا"],["كهرومغناطيسية","كهرباء + مغناطيس"],["بعلبك","بعل + بك"],["رأسمالية","رأس + مالية"]]},
+ {t:"match", q:"وصّل كل عبارة بكتابتها الصحيحة:", pairs:[["في + مَن","فيمَن"],["الباء + مَن","بمَن"],["اللام + مَن","لمَن"]]},
+ {t:"match", q:"وصّل كل جملة بعلامة الترقيم المناسبة:", pairs:[["مِمَّ يُصنع الزجاج","علامة الاستفهام (؟)"],["تأمّلتُ فيما حولي","النقطة (.)"],["ما أجمل هذه المتاجر","علامة التعجب (!)"]]},
+ {t:"match", q:"وصّل كل مثال بحكمه:", pairs:[["ثلاث مئة","تُفصل (مئة) عن عددها"],["أكلتُ","تُوصل التاء بالفعل"],["كي لا يكون دولة","تُفصل (كي) عن (لا)"]]},
+ {t:"match", q:"وصّل كل كلمة بأصلها:", pairs:[["لِمَ","اللام + ما"],["بمَ","الباء + ما"],["فيمَ","في + ما"],["لمَن","اللام + مَن"]]},
+ {t:"match", q:"وصّل كل كلمة بأصلها:", pairs:[["حبّذا","حبّ + ذا"],["البطنقدميات","البطن + قدم"],["بعلبك","بعل + بك"]]}
+];
+
+/* ============ أدوات مساعدة ============ */
+const COLORS=['#e63946','#1d7fe0','#1fa463','#f08a00','#8b3fd9','#0fa3a3'];
+const LETTERS=['أ','ب','ج','د'];
+const $=s=>document.querySelector(s);
+const app=$('#app');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const store={
+  get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const toAr=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+const fmt=s=>{s=Math.max(0,s);return toAr(Math.floor(s/60)+':'+String(s%60).padStart(2,'0'))};
+const reduceMotion=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let S=null,timer=null,endAt=0,locked=false,paused=false,soundOn=true,actx=null,wl=null,cdT=null;
+
+/* ============ خلفية الأشكال ============ */
+(function buildBg(){
+  const cols=['#ffd166','#ff8fab','#8ecae6','#95d5b2','#cdb4db','#ffb703'];
+  const shapes=[
+    c=>`<circle cx="30" cy="30" r="22" fill="${c}"/>`,
+    c=>`<circle cx="30" cy="30" r="19" fill="none" stroke="${c}" stroke-width="8"/>`,
+    c=>`<polygon points="30,6 56,52 4,52" fill="${c}"/>`,
+    c=>`<polygon points="30,4 37,22 56,23 41,35 46,54 30,43 14,54 19,35 4,23 23,22" fill="${c}"/>`,
+    c=>`<path d="M24 6h12v18h18v12H36v18H24V36H6V24h18z" fill="${c}"/>`,
+    c=>`<path d="M4 38L16 22L28 38L40 22L52 38" fill="none" stroke="${c}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>`
+  ];
+  const pos=[[3,5],[86,4],[8,36],[92,30],[4,68],[88,62],[44,2],[48,92],[20,88],[78,90],[28,14],[68,18],[95,88],[2,92]];
+  $('#bg').innerHTML=pos.map((p,i)=>{
+    const sz=38+((i*17)%38);
+    return `<svg viewBox="0 0 60 60" width="${sz}" height="${sz}" style="left:${p[0]}%;top:${p[1]}%;animation-delay:-${(i*1.7)%10}s;animation-duration:${9+(i%5)*2}s">${shapes[i%6](cols[i%6])}</svg>`;
+  }).join('');
+})();
+
+/* نافذة تأكيد داخل الصفحة (بدل confirm الذي قد يُحجب) */
+function ask(msg,yes){
+  const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="box"><p>${esc(msg)}</p><div class="row c"><button class="btn gold" id="yy">نعم</button><button class="btn ghost" id="nn">إلغاء</button></div></div>`;
+  document.body.appendChild(m);
+  m.querySelector('#yy').onclick=()=>{m.remove();yes()};
+  m.querySelector('#nn').onclick=()=>m.remove();
+}
+
+/* ============ الصوت ============ */
+function tone(f,d,t,delay,vol){
+  if(!soundOn)return;
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type=t||'sine';o.frequency.value=f;
+    const st=actx.currentTime+(delay||0);
+    g.gain.setValueAtTime(vol||.16,st);g.gain.exponentialRampToValueAtTime(.001,st+d);
+    o.connect(g);g.connect(actx.destination);o.start(st);o.stop(st+d);
+  }catch(e){}
+}
+const sndOk=()=>{tone(660,.15);tone(880,.25,'sine',.12)};
+const sndBad=()=>{tone(180,.35,'sawtooth',0,.1)};
+const sndEnd=()=>{tone(520,.2,'triangle');tone(390,.2,'triangle',.2);tone(260,.4,'triangle',.4)};
+const sndFanfare=()=>{[523,659,784,1047].forEach((f,i)=>tone(f,.28,'triangle',i*.16,.2));tone(1047,.7,'triangle',.7,.2);tone(784,.7,'sine',.7,.1)};
+
+async function keepAwake(){
+  try{if('wakeLock' in navigator&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null})}}catch(e){}
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S&&S.phase==='q')keepAwake()});
+
+/* ============ الاحتفال (قصاصات وألعاب نارية) ============ */
+const cv=$('#fx'),ctx=cv.getContext('2d');
+let parts=[],raf=null,fxTimers=[];
+function sizeCv(){const d=window.devicePixelRatio||1;cv.width=innerWidth*d;cv.height=innerHeight*d;ctx.setTransform(d,0,0,d,0,0)}
+sizeCv();addEventListener('resize',sizeCv);
+const FXCOLS=['#e63946','#1d7fe0','#1fa463','#f08a00','#8b3fd9','#0fa3a3','#ffb703','#ff6fa5'];
+function addPart(x,y,vx,vy,cols,g){
+  parts.push({x,y,vx,vy,g:g||.28,r:5+Math.random()*7,rot:Math.random()*6,vr:(Math.random()-.5)*.35,
+    c:cols[Math.floor(Math.random()*cols.length)],t:Math.floor(Math.random()*3),a:1,drag:.992});
+}
+function burst(x,y,n,cols){
+  n=reduceMotion?Math.ceil(n/4):n;
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=3+Math.random()*9;addPart(x,y,Math.cos(a)*s,Math.sin(a)*s-3,cols||FXCOLS,.22)}
+  runFx();
+}
+function rain(n,cols){
+  n=reduceMotion?Math.ceil(n/4):n;
+  for(let i=0;i<n;i++)addPart(Math.random()*innerWidth,-20-Math.random()*200,(Math.random()-.5)*3,2+Math.random()*3,cols||FXCOLS,.06);
+  runFx();
+}
+function runFx(){if(!raf)raf=requestAnimationFrame(loop)}
+function star(x,y,r){ctx.beginPath();for(let i=0;i<10;i++){const rr=i%2?r*.45:r,a=i*Math.PI/5-Math.PI/2;ctx.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}ctx.closePath();ctx.fill()}
+function loop(){
+  ctx.clearRect(0,0,innerWidth,innerHeight);
+  parts=parts.filter(p=>p.y<innerHeight+40&&p.a>0.02);
+  for(const p of parts){
+    p.vx*=p.drag;p.vy=p.vy*p.drag+p.g;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;
+    if(p.y>innerHeight*.75&&p.g>.2)p.a-=.015;
+    ctx.save();ctx.globalAlpha=Math.max(0,p.a);ctx.fillStyle=p.c;ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+    if(p.t===0)ctx.fillRect(-p.r/2,-p.r/3,p.r,p.r*.66);
+    else if(p.t===1){ctx.beginPath();ctx.arc(0,0,p.r/2.2,0,7);ctx.fill()}
+    else star(0,0,p.r*.8);
+    ctx.restore();
+  }
+  raf=parts.length?requestAnimationFrame(loop):null;
+  if(!raf)ctx.clearRect(0,0,innerWidth,innerHeight);
+}
+function stopFx(){fxTimers.forEach(clearInterval);fxTimers=[];parts=[];if(raf){cancelAnimationFrame(raf);raf=null}ctx.clearRect(0,0,innerWidth,innerHeight)}
+function celebrate(cols){
+  stopFx();sndFanfare();
+  cols=cols&&cols.length?cols.concat(FXCOLS):FXCOLS;
+  rain(140,cols);
+  let n=0;
+  const t=setInterval(()=>{
+    n++;
+    burst(innerWidth*(.15+Math.random()*.7),innerHeight*(.15+Math.random()*.35),55,cols);
+    if(n%3===0)rain(45,cols);
+    if(n>=14){clearInterval(t)}
+  },520);
+  fxTimers.push(t);
+}
+
+/* ============ الحفظ ============ */
+const save=()=>{if(S)store.set('wf_game',S)};
+function clearCd(){if(cdT){clearInterval(cdT);cdT=null}}
+
+/* ============ شاشة الإعدادات ============ */
+function showSetup(){
+  stopTimer();clearCd();stopFx();
+  const max=12;
+  const set=store.get('wf_settings')||{};
+  const names=set.names||[1,2,3,4,5,6].map(i=>'المجموعة '+toAr(i));
+  const time=set.time||60,count=Math.min(set.count||8,max);
+  if(set.sound===false)soundOn=false;
+  const saved=store.get('wf_game');
+  let rows='';
+  for(let i=0;i<6;i++)rows+=`<div class="tname"><span class="badge" style="background:${COLORS[i]}">${toAr(i+1)}</span><input type="text" id="n${i}" value="${esc(names[i]||'')}" maxlength="22"></div>`;
+  const timeOpts=[30,45,60,90,120].map(t=>`<option value="${t}" ${t===time?'selected':''}>${fmt(t)} دقيقة</option>`).join('');
+  let cOpts='';for(let c=3;c<=max;c++)cOpts+=`<option value="${c}" ${c===count?'selected':''}>${toAr(c)} سؤالًا</option>`;
+  app.innerHTML=`
+   <div class="hero">
+     <span class="pill">لعبة تفاعلية</span>
+     <h1><span>الوصل والفصل</span></h1>
+     <p class="muted" style="font-size:clamp(16px,2.6vw,22px)">ست مجموعات · لكل مجموعة وقتها وأسئلتها · الأكثر إجابات صحيحة يفوز</p>
+   </div>
+   <div class="card">
+     <h2>أسماء المجموعات</h2>
+     <div class="grid2">${rows}</div>
+   </div>
+   <div class="card">
+     <div class="grid2">
+       <div><label>وقت كل مجموعة</label><select id="time">${timeOpts}</select></div>
+       <div><label>عدد أسئلة كل مجموعة</label><select id="count">${cOpts}</select></div>
+     </div>
+     <p style="margin-top:14px"><label style="display:flex;gap:10px;align-items:center;font-size:19px;color:var(--ink)"><input type="checkbox" id="snd" ${soundOn?'checked':''} style="width:26px;height:26px"> المؤثرات الصوتية</label></p>
+   </div>
+   <div class="row c" style="margin-top:6px">
+     <button class="btn gold big" id="start">ابدأ لعبة جديدة</button>
+     ${saved&&saved.phase!=='final'?'<button class="btn ghost" id="resume">متابعة اللعبة السابقة</button>':''}
+   </div>`;
+  $('#start').onclick=()=>{
+    const nm=[...Array(6)].map((_,i)=>($('#n'+i).value.trim()||'المجموعة '+toAr(i+1)));
+    soundOn=$('#snd').checked;
+    const st={names:nm,time:+$('#time').value,count:+$('#count').value,sound:soundOn};
+    store.set('wf_settings',st);
+    tone(1,.01);keepAwake();newGame(st);
+  };
+  const r=$('#resume');
+  if(r)r.onclick=()=>{S=saved;keepAwake();resumeGame()};
+}
+
+/* توزيع الأسئلة: لكل مجموعة مزيج من الأنواع بلا تكرار بين المجموعات */
+function deal(N,teams){
+  const by={mc:[],tf:[],fill:[],match:[]};
+  QUESTIONS.forEach((q,i)=>by[q.t||'mc'].push(i));
+  for(const k in by)by[k]=shuffle(by[k]);
+  const quota={match:Math.round(N*.15),tf:Math.round(N*.2),fill:Math.round(N*.2)};
+  quota.mc=N-quota.match-quota.tf-quota.fill;
+  const out=[];
+  for(let t=0;t<teams;t++){
+    const qs=[];
+    for(const k of ['match','tf','fill','mc'])for(let j=0;j<quota[k];j++)if(by[k].length)qs.push(by[k].pop());
+    while(qs.length<N){const k=['mc','fill','tf','match'].find(k=>by[k].length);if(!k)break;qs.push(by[k].pop())}
+    out.push(shuffle(qs));
+  }
+  return out;
+}
+function newGame(set){
+  const deals=deal(set.count,6);
+  S={set,cur:0,left:set.time,phase:'intro',reason:'',
+     teams:set.names.map((n,i)=>({name:n,score:0,done:0,qs:deals[i]}))};
+  save();showIntro();
+}
+function resumeGame(){
+  if(!S)return showSetup();
+  if(S.phase==='final')return showFinal();
+  if(S.phase==='end')return showEnd();
+  showIntro();
+}
+
+function chips(){
+  return `<div class="chips">${S.teams.map((t,i)=>`<div class="chip ${i===S.cur?'now':''}"><span class="dot" style="background:${COLORS[i]}"></span>${esc(t.name)} <b>${toAr(t.score)}</b></div>`).join('')}</div>`;
+}
+function bindHome(){const h=$('#home');if(h)h.onclick=()=>ask('العودة للقائمة؟ يمكنك متابعة اللعبة لاحقًا.',()=>{stopTimer();clearCd();showSetup()})}
+
+/* ============ دور المجموعة ============ */
+function showIntro(){
+  stopTimer();clearCd();stopFx();paused=false;
+  S.phase='intro';save();
+  const t=S.teams[S.cur],col=COLORS[S.cur];
+  app.innerHTML=`
+   <div class="row" style="justify-content:space-between"><span class="muted" style="font-weight:800">الدور ${toAr(S.cur+1)} من ${toAr(S.teams.length)}</span><button class="btn ghost sm" id="home">القائمة</button></div>
+   <div class="card center" id="introCard" style="border-color:${col};min-height:360px;display:flex;flex-direction:column;justify-content:center">
+     <div class="avatar" style="background:${col}">${toAr(S.cur+1)}</div>
+     <p class="muted" style="font-weight:800">الدور الآن على</p>
+     <h1 style="color:${col}">${esc(t.name)}</h1>
+     <div class="facts">
+       <div class="fact"><small>الوقت</small>${fmt(S.left)}</div>
+       <div class="fact"><small>الأسئلة المتبقية</small>${toAr(t.qs.length-t.done)}</div>
+     </div>
+     <p style="margin-top:14px"><button class="btn gold big" id="go">ابدأ</button></p>
+   </div>
+   ${chips()}`;
+  $('#go').onclick=()=>{tone(1,.01);countdown()};
+  bindHome();
+}
+function countdown(){
+  clearCd();
+  let n=3;
+  const card=$('#introCard');
+  card.innerHTML=`<div class="cd" id="cd">${toAr(n)}</div>`;
+  tone(520,.15);
+  cdT=setInterval(()=>{
+    n--;
+    if(n>0){
+      const el=$('#cd');el.textContent=toAr(n);el.style.animation='none';void el.offsetWidth;el.style.animation='';tone(520,.15);
+    }else{clearCd();tone(880,.3);showQ()}
+  },800);
+}
+
+/* ============ السؤال ============ */
+const CIRC=2*Math.PI*44;
+const TAGS={mc:'اختر الإجابة الصحيحة',tf:'صح أم خطأ؟',fill:'أكمل الفراغ',match:'وصّل بالخط'};
+function showQ(){
+  const t=S.teams[S.cur];
+  if(t.done>=t.qs.length){S.reason='أنهت المجموعة جميع أسئلتها';return showEnd()}
+  if(S.left<=0){S.reason='انتهى الوقت';return showEnd()}
+  S.phase='q';save();locked=false;paused=false;
+  const raw=QUESTIONS[t.qs[t.done]],col=COLORS[S.cur],type=raw.t||'mc';
+  const q=type==='tf'?{...raw,c:raw.a?'صح':'خطأ'}:raw;
+  let prog='';for(let i=0;i<t.qs.length;i++)prog+=`<i class="${i<t.done?'done':i===t.done?'cur':''}"></i>`;
+  const qHtml=type==='fill'?esc(q.q).replace('___','<span class="blank" id="blank"></span>'):esc(q.q);
+  let body;
+  if(type==='match')body='<div id="qbody"></div>';
+  else if(type==='tf')body=`<div class="opts two"><button class="opt tf" data-v="صح"><span class="l">✔</span><span>صح</span></button><button class="opt tf" data-v="خطأ"><span class="l">✘</span><span>خطأ</span></button></div>`;
+  else{const opts=shuffle([q.c,...q.w]);body=`<div class="opts">${opts.map((o,i)=>`<button class="opt" data-v="${esc(o)}"><span class="l">${LETTERS[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>`}
+  app.innerHTML=`
+   <div class="top">
+     <div class="tbadge"><span class="badge" style="background:${col}">${toAr(S.cur+1)}</span>${esc(t.name)}</div>
+     <div class="ring" id="ring"><svg viewBox="0 0 100 100"><circle class="bgc" cx="50" cy="50" r="44" fill="none" stroke-width="9"/><circle class="fg" id="fg" cx="50" cy="50" r="44" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="${CIRC}" stroke-dashoffset="0"/></svg><b id="tm">${fmt(S.left)}</b></div>
+     <div class="scorebox"><small>النقاط</small>${toAr(t.score)}</div>
+   </div>
+   <div class="prog">${prog}</div>
+   <div class="card q ${type==='match'?'sm':''}" style="border-color:${col}"><div class="qtag">${TAGS[type]}</div><div>${qHtml}</div></div>
+   ${body}
+   <div class="note" id="note"></div>
+   <div class="row c"><button class="btn ghost sm" id="pz">إيقاف مؤقت</button></div>`;
+  if(type==='match')renderMatch(q);
+  else document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(b,q,type));
+  $('#pz').onclick=pauseGame;
+  startTimer();
+}
+function startTimer(){stopTimer();endAt=Date.now()+S.left*1000;tick();timer=setInterval(tick,200)}
+function stopTimer(){
+  if(timer){clearInterval(timer);timer=null;
+    if(S&&S.phase==='q')S.left=Math.max(0,Math.ceil((endAt-Date.now())/1000));}
+}
+function tick(){
+  const left=Math.max(0,Math.ceil((endAt-Date.now())/1000));
+  S.left=left;
+  const tm=$('#tm'),fg=$('#fg'),ring=$('#ring');
+  if(tm)tm.textContent=fmt(left);
+  if(fg)fg.style.strokeDashoffset=CIRC*(1-left/S.set.time);
+  if(ring)ring.classList.toggle('low',left<=10);
+  if(left<=0){clearInterval(timer);timer=null;locked=true;S.reason='انتهى الوقت';sndEnd();showEnd()}
+}
+
+/* تسجيل نتيجة السؤال والانتقال للتالي */
+function finish(ok,text){
+  const t=S.teams[S.cur];
+  t.done++;if(ok)t.score++;
+  const note=$('#note');
+  if(note){note.style.color=ok?'#14935a':'#c42a49';note.textContent=text}
+  if(ok){sndOk();burst(innerWidth/2,innerHeight*.55,26,[COLORS[S.cur],'#ffb703','#22b573'])}else sndBad();
+  save();
+  setTimeout(()=>{if(S&&S.phase==='q'&&!paused)showQ()},ok?1200:2600);
+}
+
+/* اختيار من متعدد / صح وخطأ / فراغات */
+function answer(btn,q,type){
+  if(locked||paused)return;
+  locked=true;stopTimer();
+  const ok=btn.dataset.v===q.c;
+  document.querySelectorAll('.opt').forEach(b=>{
+    if(b.dataset.v===q.c)b.classList.add('ok');
+    else if(b===btn)b.classList.add('bad');
+    else b.classList.add('dim');
+  });
+  if(type==='fill'){const bl=$('#blank');if(bl){bl.textContent=btn.dataset.v;bl.classList.add(ok?'ok':'bad')}}
+  finish(ok,ok?('أحسنتم! '+(q.e||'')):('الإجابة الصحيحة: '+q.c+(q.e?' — '+q.e:'')));
+}
+
+/* التوصيل: اضغط كلمة ثم ما يناسبها. نقطة واحدة إذا اكتمل التوصيل بلا أخطاء */
+function renderMatch(q){
+  const LC=['#e63946','#1d7fe0','#1fa463','#f08a00'];
+  const A=shuffle(q.pairs.map((p,i)=>({i,x:p[0]})));
+  const B=shuffle(q.pairs.map((p,i)=>({i,x:p[1]})));
+  $('#qbody').innerHTML=`<div class="mhint">اضغط كلمة ثم اضغط ما يناسبها</div>
+    <div class="match" id="mt"><svg class="lines" id="lines"></svg>
+      <div class="mcol">${A.map(o=>`<button class="mi" data-s="a" data-i="${o.i}">${esc(o.x)}</button>`).join('')}</div>
+      <div class="mcol">${B.map(o=>`<button class="mi" data-s="b" data-i="${o.i}">${esc(o.x)}</button>`).join('')}</div>
+    </div>`;
+  let sel=null,mistake=false,matched=0;
+  const total=q.pairs.length;
+  document.querySelectorAll('.mi').forEach(b=>b.onclick=()=>{
+    if(locked||paused||b.classList.contains('done'))return;
+    if(!sel){sel=b;b.classList.add('sel');return}
+    if(sel===b){b.classList.remove('sel');sel=null;return}
+    if(sel.dataset.s===b.dataset.s){sel.classList.remove('sel');sel=b;b.classList.add('sel');return}
+    const first=sel;sel=null;first.classList.remove('sel');
+    if(first.dataset.i===b.dataset.i){
+      const c=LC[matched%LC.length];
+      [first,b].forEach(x=>{x.classList.add('done');x.style.setProperty('--bc',c);x.style.setProperty('--tint',c+'22')});
+      const box=$('#mt').getBoundingClientRect(),r1=first.getBoundingClientRect(),r2=b.getBoundingClientRect();
+      const L=r1.left<r2.left?r1:r2,R=r1.left<r2.left?r2:r1;
+      const ln=`<line x1="${L.right-box.left}" y1="${L.top+L.height/2-box.top}" x2="${R.left-box.left}" y2="${R.top+R.height/2-box.top}" stroke="${c}" stroke-width="6" stroke-linecap="round"/><circle cx="${L.right-box.left}" cy="${L.top+L.height/2-box.top}" r="7" fill="${c}"/><circle cx="${R.left-box.left}" cy="${R.top+R.height/2-box.top}" r="7" fill="${c}"/>`;
+      $('#lines').insertAdjacentHTML('beforeend',ln);
+      matched++;tone(740,.12);
+      if(matched===total){
+        locked=true;stopTimer();
+        finish(!mistake,mistake?'اكتمل التوصيل لكن كان فيه خطأ — لا نقطة':'أحسنتم! توصيل صحيح كاملًا');
+      }
+    }else{
+      mistake=true;sndBad();
+      [first,b].forEach(x=>x.classList.add('wrong'));
+      setTimeout(()=>[first,b].forEach(x=>x.classList.remove('wrong')),500);
+    }
+  });
+}
+function pauseGame(){
+  if(locked||paused)return;
+  paused=true;stopTimer();
+  const o=document.createElement('div');o.className='pause';o.id='pov';
+  o.innerHTML='<h1>إيقاف مؤقت</h1><button class="btn gold big" id="rs">استمرار</button><button class="btn ghost sm" id="mn">القائمة</button>';
+  document.body.appendChild(o);
+  $('#rs').onclick=()=>{o.remove();paused=false;startTimer()};
+  $('#mn').onclick=()=>ask('العودة للقائمة؟ يمكنك متابعة اللعبة لاحقًا.',()=>{o.remove();showSetup()});
+}
+
+/* ============ نهاية الدور ============ */
+function showEnd(){
+  stopTimer();clearCd();
+  const pov=$('#pov');if(pov)pov.remove();
+  S.phase='end';save();
+  const t=S.teams[S.cur],last=S.cur>=S.teams.length-1,col=COLORS[S.cur];
+  const nextName=last?'':esc(S.teams[S.cur+1].name);
+  app.innerHTML=`
+   <div class="card center" style="border-color:${col}">
+     <p class="muted" style="font-weight:800">${esc(S.reason||'انتهى الدور')}</p>
+     <h1 style="color:${col}">${esc(t.name)}</h1>
+     <div class="bigscore">${toAr(t.score)}<span style="font-size:.4em;color:var(--muted)"> / ${toAr(t.qs.length)}</span></div>
+     <p class="muted" style="font-weight:700">أجابت عن ${toAr(t.done)} سؤالًا</p>
+     <p style="margin-top:20px"><button class="btn gold big" id="nx">${last?'عرض النتيجة النهائية':'المجموعة التالية: '+nextName}</button></p>
+   </div>
+   ${chips()}`;
+  if(t.score>0){stopFx();burst(innerWidth/2,innerHeight*.3,Math.min(90,30+t.score*12),[col,'#ffb703','#fff2b3'])}
+  $('#nx').onclick=()=>{
+    stopFx();
+    if(last)showFinal();else{S.cur++;S.left=S.set.time;showIntro()}
+  };
+}
+
+/* ============ النتيجة النهائية ============ */
+function showFinal(){
+  stopTimer();clearCd();
+  S.phase='final';save();
+  const arr=S.teams.map((t,i)=>({...t,i})).sort((a,b)=>b.score-a.score||a.i-b.i);
+  const top=arr[0].score;
+  const winners=arr.filter(t=>t.score===top);
+  const title=winners.length===1?esc(winners[0].name):winners.map(w=>esc(w.name)).join(' و ');
+  const head=winners.length===1?'🎉 مبروك للفائزين 🎉':'🎉 تعادل رائع 🎉';
+  const medal=['🥇','🥈','🥉'];
+  const wcol=winners.length===1?COLORS[winners[0].i]:'var(--ink)';
+  app.innerHTML=`
+   <div class="card win">
+     <svg class="cup" viewBox="0 0 120 112"><path d="M36 10h48v32c0 18-11 30-24 30S36 60 36 42z" fill="#ffc83d" stroke="#e29a00" stroke-width="4"/><path d="M36 20H18c0 22 8 34 22 36M84 20h18c0 22-8 34-22 36" fill="none" stroke="#e29a00" stroke-width="6" stroke-linecap="round"/><rect x="54" y="70" width="12" height="18" fill="#e29a00"/><rect x="38" y="88" width="44" height="14" rx="5" fill="#ff9f1c"/><path d="M60 20l5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1z" fill="#fff"/></svg>
+     <p style="font-weight:900;font-size:clamp(20px,4vw,30px)">${head}</p>
+     <h1 style="color:${wcol}">${title}</h1>
+     <p class="muted" style="font-weight:800;font-size:clamp(18px,3vw,26px)">بـ ${toAr(top)} نقطة</p>
+   </div>
+   <div class="card">
+     <h2>الترتيب النهائي</h2>
+     ${arr.map((t,k)=>`
+     <div class="rank ${t.score===top?'top1':''}" style="--c:${COLORS[t.i]}">
+       <span class="fill" data-w="${top?Math.round(t.score/top*100):0}"></span>
+       <span class="n">${t.score===top?'🏆':(medal[k]||toAr(k+1))}</span>
+       <span class="dot" style="background:${COLORS[t.i]};width:18px;height:18px"></span>
+       <span class="nm">${esc(t.name)}</span>
+       <span class="pt">${toAr(t.score)}</span>
+     </div>`).join('')}
+   </div>
+   <div class="row c">
+     <button class="btn gold big" id="again">لعبة جديدة بأسئلة جديدة</button>
+     <button class="btn" id="party">🎊 احتفال</button>
+     <button class="btn ghost" id="menu">القائمة</button>
+   </div>`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll('.rank .fill').forEach(f=>f.style.width=f.dataset.w+'%')));
+  const wc=winners.map(w=>COLORS[w.i]);
+  celebrate(wc);
+  $('#again').onclick=()=>{stopFx();newGame(S.set)};
+  $('#party').onclick=()=>celebrate(wc);
+  $('#menu').onclick=showSetup;
+}
+
+/* ============ تشغيل ============ */
+(function init(){
+  const set=store.get('wf_settings');
+  if(set&&set.sound===false)soundOn=false;
+  const saved=store.get('wf_game');
+  if(saved&&saved.phase==='final'){S=saved;showFinal()}
+  else showSetup();
+})();
+</script>
+</body>
+</html>
